@@ -47,3 +47,5 @@ downloads/
 *.mp4
 *.webm
 *.mov
+urls.txt
+failed_urls_*.txt

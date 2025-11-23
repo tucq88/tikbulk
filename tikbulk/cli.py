@@ -3,6 +3,7 @@
 import click
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
@@ -43,7 +44,7 @@ def download_video(url: str, output_dir: Path, quality: str = "best") -> bool:
 
 
 @click.command()
-@click.argument('urls', nargs=-1, required=True)
+@click.argument('urls', nargs=-1)
 @click.option(
     '--output', '-o',
     type=click.Path(),
@@ -109,6 +110,7 @@ def main(urls: tuple, output: str, quality: str, file: click.File, verbose: bool
     # Download each video
     successful = 0
     failed = 0
+    failed_urls: List[str] = []
 
     for i, url in enumerate(unique_urls, 1):
         click.echo(f"[{i}/{len(unique_urls)}] Downloading: {url}")
@@ -117,7 +119,18 @@ def main(urls: tuple, output: str, quality: str, file: click.File, verbose: bool
             click.echo(f"✓ Successfully downloaded\n")
         else:
             failed += 1
+            failed_urls.append(url)
             click.echo(f"✗ Failed to download\n")
+
+    # Save failed URLs to a timestamped file
+    failed_file_path = None
+    if failed_urls:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        failed_file_path = Path(f"failed_urls_{timestamp}.txt")
+        with open(failed_file_path, 'w', encoding='utf-8') as f:
+            for url in failed_urls:
+                f.write(f"{url}\n")
+        click.echo(f"Failed URLs saved to: {failed_file_path}")
 
     # Summary
     click.echo("=" * 50)
@@ -125,6 +138,9 @@ def main(urls: tuple, output: str, quality: str, file: click.File, verbose: bool
     click.echo(f"Successful: {successful}")
     click.echo(f"Failed: {failed}")
     click.echo(f"Total: {len(unique_urls)}")
+    if failed_file_path:
+        click.echo(f"\nTo retry failed downloads, run:")
+        click.echo(f"  uv run tikbulk --file {failed_file_path}")
 
 
 if __name__ == '__main__':
