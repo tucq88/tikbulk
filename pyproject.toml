@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tikbulk"
+version = "0.1.0"
+description = "A simple CLI tool for downloading TikTok videos in bulk"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "yt-dlp>=2023.12.30",
+    "click>=8.1.0",
+]
+
+[project.scripts]
+tikbulk = "tikbulk.cli:main"
